@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public String token = "fdsfs324nvds";
     private String alias = "chniccs";
     private KeyStore mKeyStore = null;
-    char[] chars ;
+    char[] chars;
 
 
     /**
@@ -58,59 +58,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
-        Button sava= (Button) findViewById(R.id.save_secretkey);
-        Button encrypt= (Button) findViewById(R.id.encrypt_token);
-        Button dcerypt= (Button) findViewById(R.id.decrypt_token);
+        Button sava = (Button) findViewById(R.id.save_secretkey);
+        Button encrypt = (Button) findViewById(R.id.encrypt_token);
+        Button dcerypt = (Button) findViewById(R.id.decrypt_token);
         sava.setOnClickListener(this);
         encrypt.setOnClickListener(this);
         dcerypt.setOnClickListener(this);
     }
 
     private void encryptToken() {
-        if (mKeyStore == null) {
-            try {
-                mKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                mKeyStore.load(null,chars);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        initKeyStore();
         try {
             Key key = mKeyStore.getKey(alias, chars);
             String AESsecretKey = new String(key.getEncoded());
             String secretKey = SecurityUtil.getInstance().decrypt(AESsecretKey);
             String encryptToken = SecurityUtil.getInstance().encrypt(token, secretKey);
-            Log.d(TAG,"加密后："+ encryptToken);
-            PreferenceUtils.setString(this,AES_TOKEN,encryptToken);
+            Log.d(TAG, "加密后：" + encryptToken);
+            PreferenceUtils.setString(this, AES_TOKEN, encryptToken);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    private void decryptToken(){
-        if (mKeyStore == null) {
-            try {
-                mKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                mKeyStore.load(null,chars);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
+    private void decryptToken() {
+        initKeyStore();
         try {
-            Key key = mKeyStore.getKey(alias,chars);
+            Key key = mKeyStore.getKey(alias, chars);
             Enumeration<String> aliases = mKeyStore.aliases();
 //            while (aliases.hasMoreElements()){
 //                Log.d(TAG,aliases.nextElement());
 //            }
             String AESsecretKey = new String(key.getEncoded());
             String secretKey = SecurityUtil.getInstance().decrypt(AESsecretKey);
-            String decryptToken = SecurityUtil.getInstance().decrypt(PreferenceUtils.getString(this,AES_TOKEN), secretKey);
-            Log.d(TAG,"解密后："+ decryptToken);
+            String decryptToken = SecurityUtil.getInstance().decrypt(PreferenceUtils.getString(this, AES_TOKEN), secretKey);
+            Log.d(TAG, "解密后：" + decryptToken);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    private void initKeyStore(){
-        if (mKeyStore == null) {
+
+    private void initKeyStore() {
             try {
                 mKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 File file = new File(this.getFilesDir(), "temp");
@@ -125,8 +112,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-
     }
 
     private void saveSecretKey() {
@@ -167,16 +152,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             SecretKey key = keyFactory.generateSecret(keySpec);
             KeyStore.SecretKeyEntry entry = new KeyStore.SecretKeyEntry(key);
             //设置密码保护
-           final KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(chars);
+            final KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(chars);
             //存储
             mKeyStore.setEntry(alias, entry, passwordProtection);
-            KeyStore.LoadStoreParameter loadStoreParameter=new KeyStore.LoadStoreParameter() {
+            KeyStore.LoadStoreParameter loadStoreParameter = new KeyStore.LoadStoreParameter() {
                 @Override
                 public KeyStore.ProtectionParameter getProtectionParameter() {
                     return passwordProtection;
                 }
             };
-            mKeyStore.store(loadStoreParameter);
+            mKeyStore.store(null);
             Key anchu = mKeyStore.getKey(alias, chars);
             Log.d(TAG, new String(anchu.getEncoded()));
         } catch (Exception e) {
@@ -204,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.save_secretkey:
                 saveSecretKey();
                 break;
