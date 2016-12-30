@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+    defaultConfig {
+        applicationId "com.chniccs.myapplication"
+        minSdkVersion 19
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk{
+            moduleName "chniccsJni"         //生成的so名字
+            abiFilters "armeabi", "armeabi-v7a", "x86" ,"arm64-v8a", "x86_64"//输出指定三种abi体系结构下的so库。目前可有可无。
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir 'src/main/jni_src'//告知jni源码目录
+        }
+        debug.setRoot('build-types/debug')
+    }
+
+    signingConfigs {
+        debug {
+            keyAlias 'jni'
+            keyPassword '334200'
+            storeFile file('../jni/jnitest.jks')
+            storePassword '334200'
+        }
+        release {
+            keyAlias 'jni'
+            keyPassword '334200'
+            storeFile file('../jni/jnitest.jks')
+            storePassword '334200'
+        }
+    }
+    buildTypes {
+
+        debug {
+            shrinkResources false//删除无用资源
+            minifyEnabled false//开启混淆
+            debuggable true
+            jniDebuggable true
+            zipAlignEnabled false;//zip优化
+            signingConfig signingConfigs.debug
+        }
+        release {
+            shrinkResources false//删除无用资源
+            minifyEnabled false//开启混淆
+            debuggable true
+            jniDebuggable true
+            zipAlignEnabled false;//zip优化
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.0.0'
+    testCompile 'junit:junit:4.12'
+}
